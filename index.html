@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Valentine</title>
 
-  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <style>
@@ -47,15 +46,12 @@
         font-size: 16pt;
         margin-bottom: 12px;
       }
-
-      .sig { margin-top: 20px; }
     }
   </style>
 </head>
 
 <body class="gradient-background">
 
-<!-- APP -->
 <div id="app" class="flex items-center justify-center min-h-screen">
   <div class="flex flex-col items-center p-4 text-center">
 
@@ -64,6 +60,7 @@
       src="./images/image1.gif"
       class="rounded-md h-[300px] w-[300px]"
       style="object-fit:cover;"
+      alt="cute gif"
     />
 
     <h2 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] my-4">
@@ -86,10 +83,10 @@
       </button>
     </div>
 
-    <!-- Print Game -->
+    <!-- Print mini-game -->
     <div id="printGame" class="hidden mt-6 max-w-xl">
       <p class="text-lg font-semibold text-[#bd1e59]">
-        Okayyy 😭 your message is locked.
+        Your letter is locked! 😈
       </p>
       <p class="mt-2 text-gray-700">
         Go to the printer and open <b>Print</b> to reveal it.<br>
@@ -140,7 +137,6 @@
 Love,
 Hashim.`;
 
-  // Insert letter
   letterPreview.textContent = LETTER;
   letterPrintText.innerHTML = LETTER.split("\n").map(l => `<p>${l}</p>`).join("");
 
@@ -148,19 +144,20 @@ Hashim.`;
   function moveNo() {
     const maxX = window.innerWidth - noButton.offsetWidth - 20;
     const maxY = window.innerHeight - noButton.offsetHeight - 20;
+
     noButton.style.position = "absolute";
     noButton.style.left = Math.random() * maxX + "px";
     noButton.style.top = Math.random() * maxY + "px";
   }
 
-  ["mouseenter","mousemove","touchstart"].forEach(e =>
-    noButton.addEventListener(e, (evt) => {
-      evt.preventDefault();
+  ["mouseenter","mousemove","touchstart"].forEach(evt => {
+    noButton.addEventListener(evt, (e) => {
+      e.preventDefault();
       moveNo();
-    })
-  );
+    }, { passive: false });
+  });
 
-  noButton.addEventListener("click", e => {
+  noButton.addEventListener("click", (e) => {
     e.preventDefault();
     moveNo();
   });
@@ -176,10 +173,9 @@ Hashim.`;
 
   yesButton.addEventListener("click", () => {
     imageDisplay.src = "./images/image7.gif";
-    valentineQuestion.textContent = "Yayyy!! 🎉💖";
+    valentineQuestion.textContent = "I knew you would make the right choice! 🎉💖";
     responseButtons.style.display = "none";
     printGame.classList.remove("hidden");
-
     window.confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
   });
 
