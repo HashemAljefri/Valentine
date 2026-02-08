@@ -1,63 +1,145 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Valentines Day</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine</title>
+
   <script src="https://cdn.tailwindcss.com"></script>
+
   <style>
     .gradient-background {
       background: rgb(255, 208, 229);
-      background: linear-gradient(180deg, rgba(255, 208, 229, 1) 0%, rgba(255, 232, 242, 1) 36%, rgba(255, 255, 255, 1) 100%);
+      background: linear-gradient(
+        180deg,
+        rgba(255, 208, 229, 1) 0%,
+        rgba(255, 232, 242, 1) 36%,
+        rgba(255, 255, 255, 1) 100%
+      );
     }
 
-    .bounce2 {
-      animation: bounce2 2s ease infinite;
-    }
-
+    .bounce2 { animation: bounce2 2s ease infinite; }
     @keyframes bounce2 {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-20px); }
+      60% { transform: translateY(-10px); }
+    }
+
+    /* Make the NO button smooth when it teleports */
+    #noButton {
+      transition: left 0.12s ease, top 0.12s ease, transform 0.12s ease;
+      touch-action: manipulation;
+    }
+
+    /* Print styling: only print the letter cleanly */
+    @media print {
+      body { background: white !important; }
+      #app { display: none !important; }
+      #printLetter { display: block !important; }
+      #printLetter {
+        padding: 24px;
+        font-family: Georgia, "Times New Roman", serif;
+        color: #111;
+        line-height: 1.6;
+        font-size: 12pt;
       }
-      40% {
-        transform: translateY(-20px);
-      }
-      60% {
-        transform: translateY(-10px);
-      }
+      #printLetter h1 { font-size: 16pt; margin-bottom: 10px; }
+      #printLetter .sig { margin-top: 18px; }
     }
   </style>
 </head>
+
 <body class="gradient-background">
-  <div class="flex items-center justify-center h-screen">
-    <div class="flex flex-col items-center p-4">
-      <img id="imageDisplay" src="./images/image1.gif" alt="Cute kitten with flowers" class="rounded-md h-[300px]" style="object-fit: cover;" />
-      <h2 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] my-4">Mariam, will you be my Valentine?</h2>
-      <div class="flex gap-4 pt-[20px] items-center" id="responseButtons">
-        <button id="yesButton"
-          class="bounce2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-[20px] font-medium disabled:pointer-events-none disabled:opacity-50 hover:bg-green-400 min-h-12 min-w-[75px] px-4 py-2 bg-green-500 text-white transition">
+  <!-- APP UI -->
+  <div id="app" class="flex items-center justify-center min-h-screen">
+    <div class="flex flex-col items-center p-4 text-center">
+      <img
+        id="imageDisplay"
+        src="./images/image1.gif"
+        alt="Cute GIF"
+        class="rounded-md h-[300px] w-[300px]"
+        style="object-fit: cover;"
+      />
+
+      <h2 id="valentineQuestion" class="text-4xl font-bold italic text-[#bd1e59] my-4">
+        Mariam, will you be my Valentine?
+      </h2>
+
+      <div class="flex gap-4 pt-[20px] items-center justify-center relative" id="responseButtons">
+        <button
+          id="yesButton"
+          class="bounce2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-[20px] font-medium hover:bg-green-400 min-h-12 min-w-[90px] px-4 py-2 bg-green-500 text-white transition"
+        >
           Yes
         </button>
-        <button id="noButton"
-          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-[20px] font-medium transition disabled:pointer-events-none disabled:opacity-50 hover:bg-red-700 h-12 min-w-[75px] w-auto px-4 py-2 bg-red-500 text-white">
+
+        <button
+          id="noButton"
+          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-[20px] font-medium hover:bg-red-700 h-12 min-w-[90px] px-4 py-2 bg-red-500 text-white"
+        >
           No
         </button>
+      </div>
+
+      <!-- After YES: Print mini-game -->
+      <div id="printGame" class="mt-6 hidden max-w-xl">
+        <p class="text-lg font-semibold text-[#bd1e59]">
+          Okayyy 😭 your message is locked.
+        </p>
+        <p class="mt-2 text-gray-700">
+          Go to the printer and open <b>Print</b> to reveal it.
+          <br />
+          <span class="font-semibold">Print it on a small letter-sized paper.</span>
+        </p>
+
+        <button
+          id="printBtn"
+          class="mt-4 inline-flex items-center justify-center rounded-md px-4 py-2 bg-[#bd1e59] text-white font-bold hover:opacity-90 transition"
+        >
+          Open Print to Reveal 🖨️
+        </button>
+
+        <p class="mt-3 text-sm text-gray-600">
+          (The letter will appear when print preview opens.)
+        </p>
+      </div>
+
+      <!-- After unlock (optional on-screen reveal too) -->
+      <div id="onScreenReveal" class="mt-6 hidden max-w-2xl bg-white/80 rounded-2xl p-5 border border-pink-100 shadow">
+        <p class="text-xl font-bold text-[#bd1e59]">💌 Your letter:</p>
+        <p id="letterPreview" class="mt-3 text-left text-gray-800 whitespace-pre-line"></p>
       </div>
     </div>
   </div>
 
+  <!-- PRINT-ONLY LETTER (hidden on screen, shown in print preview) -->
+  <div id="printLetter" style="display:none;">
+    <h1>💌 A Letter For You</h1>
+    <div id="letterPrintText"></div>
+  </div>
+
   <script type="module">
-    import confetti from 'https://cdn.skypack.dev/canvas-confetti';
-    const yesButton = document.getElementById('yesButton');
-    const noButton = document.getElementById('noButton');
-    const imageDisplay = document.getElementById('imageDisplay');
-    const valentineQuestion = document.getElementById('valentineQuestion');
-    const responseButtons = document.getElementById('responseButtons');
-  
+    import confetti from "https://cdn.skypack.dev/canvas-confetti";
+
+    const yesButton = document.getElementById("yesButton");
+    const noButton = document.getElementById("noButton");
+    const imageDisplay = document.getElementById("imageDisplay");
+    const valentineQuestion = document.getElementById("valentineQuestion");
+    const responseButtons = document.getElementById("responseButtons");
+
+    const printGame = document.getElementById("printGame");
+    const printBtn = document.getElementById("printBtn");
+    const onScreenReveal = document.getElementById("onScreenReveal");
+    const letterPreview = document.getElementById("letterPreview");
+
+    const letterPrintText = document.getElementById("letterPrintText");
+
+    // Your GIF sequence (keep these files in /images)
     let noClickCount = 0;
-    let buttonHeight = 48; // Starting height in pixels
-    let buttonWidth = 80;
-    let fontSize = 20; // Starting font size in pixels
+    let buttonHeight = 48;
+    let buttonWidth = 90;
+    let fontSize = 20;
+
     const imagePaths = [
       "./images/image1.gif",
       "./images/image2.gif",
@@ -65,28 +147,131 @@
       "./images/image4.gif",
       "./images/image5.gif",
       "./images/image6.gif",
-      "./images/image7.gif"
+      "./images/image7.gif",
     ];
-  
-  ['mouseenter', 'mousemove'].forEach(evt => {
-  noButton.addEventListener(evt, () => {
-    const maxX = window.innerWidth - noButton.offsetWidth;
-    const maxY = window.innerHeight - noButton.offsetHeight;
 
-    noButton.style.position = 'absolute';
-    noButton.style.left = `${Math.random() * maxX}px`;
-    noButton.style.top = `${Math.random() * maxY}px`;
-  });
-});
+    // ✅ Your letter (exactly as you provided)
+    const LETTER = `We planted a seed together—quiet, full of promise—and from the start it seemed to know how to grow. Like the plants we brought home from the market and the stinky lilies that I can still smell, it settled in naturally, opening itself to the light little by little. I’ve known you only a short while, yet you already feel like home in the best way, a kind of ease I didn’t expect. What began as a seed now feels like it’s unfolding into a flower, more beautiful than any other we stumbled across. I will water it with my love in hopes to see it sprout into the garden like the one you said you want to grow, and I can sense it reaching even further—toward something bigger, something without a clear end. I don’t pretend to know what the future holds, but I do know I want to keep nurturing what we have, with care, patience, and hope, and see where it’s meant to grow..
 
-  
-    yesButton.addEventListener('click', () => {
-      imageDisplay.src = './images/image7.gif'; // Change to image7.gif
-      valentineQuestion.textContent = "Yayyy!! :3"; // Change the question text
-      responseButtons.style.display = 'none'; // Hide both buttons
-      confetti(); // Trigger confetti animation
+Love,
+Hashim.`;
+
+    // Put letter into print container + optional on-screen preview
+    function setLetterContent() {
+      // Print version (simple paragraphs)
+      const html = LETTER
+        .split("\n")
+        .map(line => `<p>${line.replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")}</p>`)
+        .join("");
+      letterPrintText.innerHTML = html;
+
+      // On-screen preview (kept hidden until unlock)
+      letterPreview.textContent = LETTER;
+    }
+    setLetterContent();
+
+    // ----------------------------
+    // NO button: "impossible" trick
+    // ----------------------------
+    function moveNoButton() {
+      const maxX = window.innerWidth - noButton.offsetWidth - 20;
+      const maxY = window.innerHeight - noButton.offsetHeight - 20;
+
+      const randomX = Math.max(10, Math.random() * maxX);
+      const randomY = Math.max(10, Math.random() * maxY);
+
+      noButton.style.position = "absolute";
+      noButton.style.left = `${randomX}px`;
+      noButton.style.top = `${randomY}px`;
+    }
+
+    // Runs away on mouse approach AND while chasing
+    ["mouseenter", "mousemove"].forEach(evt => {
+      noButton.addEventListener(evt, () => {
+        moveNoButton();
+      });
     });
-  </script>  
-</body>
 
+    // Mobile: runs away on touch
+    noButton.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      moveNoButton();
+    }, { passive: false });
+
+    // If she somehow clicks it, it still won't "work"
+    noButton.addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      // Optional: keep your original "guilt" progression + YES grows
+      if (noClickCount < 5) {
+        noClickCount++;
+        imageDisplay.src = imagePaths[Math.min(noClickCount, imagePaths.length - 1)];
+
+        buttonHeight += 35;
+        buttonWidth += 35;
+        fontSize += 8;
+
+        yesButton.style.height = `${buttonHeight}px`;
+        yesButton.style.width = `${buttonWidth}px`;
+        yesButton.style.fontSize = `${fontSize}px`;
+
+        const phrases = ["No", "Are you sure?", "Pookie please", "Don't do this to me :(", "You're breaking my heart", "I'm gonna cry..."];
+        noButton.textContent = phrases[Math.min(noClickCount, phrases.length - 1)];
+      }
+
+      // And immediately run away again
+      moveNoButton();
+    });
+
+    // ----------------------------
+    // YES button flow
+    // ----------------------------
+    let unlocked = false;
+
+    function unlockLetter() {
+      if (unlocked) return;
+      unlocked = true;
+
+      // Show on-screen reveal too (optional but nice after print preview)
+      onScreenReveal.classList.remove("hidden");
+      printGame.classList.add("hidden");
+    }
+
+    yesButton.addEventListener("click", () => {
+      imageDisplay.src = "./images/image7.gif";
+      valentineQuestion.textContent = "Yayyy!! 🎉💖";
+      responseButtons.style.display = "none";
+
+      // Show print instructions
+      printGame.classList.remove("hidden");
+
+      // Confetti burst
+      confetti({
+        particleCount: 120,
+        spread: 70,
+        origin: { y: 0.6 },
+      });
+    });
+
+    // Open print dialog on button click
+    printBtn.addEventListener("click", () => {
+      window.print();
+    });
+
+    // Unlock when print preview opens (this is the "go to the printer" trick)
+    window.addEventListener("beforeprint", () => {
+      unlockLetter();
+    });
+
+    // Extra support for some browsers
+    if (window.matchMedia) {
+      const mediaQueryList = window.matchMedia("print");
+      mediaQueryList.addEventListener("change", (mql) => {
+        if (mql.matches) unlockLetter();
+      });
+    }
+  </script>
+</body>
 </html>
+
